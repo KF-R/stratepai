@@ -4,8 +4,10 @@ Terminal Stratego for the ASCII and ANSI inclined.
 
 This plain text Stratego interface is useful for training AI's.  Also, having been written in just 250 Python locs (approx. lines of code), it's easily integrated into another project. 
 <hr/>
+
 ### Piece notation: 
 '@', 'S', '1', 'm', '3', '4', '5', '6', 'C', 'G', 'M', 'o'
+
 ### Corresponding piece names:
 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb'
 <hr/>
