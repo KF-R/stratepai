@@ -14,19 +14,13 @@ ANSI = {'black': "\u001b[30m", 'red': "\u001b[31m", 'green': "\u001b[32m", 'yell
 activePlayer, setupPhase, victory = TEAM_RED, True, False
 selection, target = None, None
 
-# TODO: Players can't pass
-
 def piece_char(piece_value: int = 0):
     return ANSI['red'] + pieceChar[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceChar[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
 def piece_name(piece_value: int = 0):
     return ANSI['red'] + pieceName[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceName[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
-def describe_piece_distribution():
-    for i in range(1,len(pieceChar)): print(f"{pieceDistribtions[i]} x {pieceNames[i]} ({pieceChar[i]})")
-
 def set_piece(row: int = 0, piece_value:int = 0, numRows:int = 1):
-    global board
     """
     Replace a random zero in the specified row or subsequent rows of the board with the given piece value.
     
@@ -34,6 +28,8 @@ def set_piece(row: int = 0, piece_value:int = 0, numRows:int = 1):
     :param piece_value: The piece value to place (between 1 and 12).
     :param numRows: The number of rows to consider for placing the piece, starting from 'row'.
     """
+    global board
+
     # The board is 10x10
     row_start = row * 10
     row_end = row_start + 10 * numRows
@@ -130,10 +126,9 @@ def get_valid_moves(selection: int):
     row, col = divmod(selection, 10)
     
     piece = board[selection] % PIECE_LIMIT # Blue pieces are >= PIECE_LIMIT
-    # print(f"piece: {piece} ({pieceChar[piece]})")
     if piece in [P_BOMB, P_FLAG]: # Static piece
         return []
-    elif board[selection] == P_SCOUT:
+    elif piece  == P_SCOUT:
         n = 9
     else:
         n = 1
@@ -163,7 +158,10 @@ def validated_input(prompt:str = '> ') -> int:
             selection = None
             target = None
             return None
-        
+        elif user_input.upper() == 'Q':
+            print('Bye!')
+            exit()
+
         # Moving on to expected coordinate pairs: Split the input based on space
         parts = user_input.split()
         # Check if there are exactly two parts and each part is a single digit
@@ -189,7 +187,6 @@ def resolve_conflict(attacker: int, defender: int ):
     else: return defender # piece_name(attacker) destroyed
 
 def no_valid_moves_check():
-
     for i in range(0, len(board)):
         # print(piece_name(board[i]))
         if board[i] == 0 or board[i] == 255: continue
@@ -197,10 +194,9 @@ def no_valid_moves_check():
             if board[i] <= PIECE_LIMIT: # Red piece
                 if len(get_valid_moves(i)) > 0: # print(f"valid red move found at {i}")
                     return False
-
         else: # TEAM_BLUE
             if board[i] > PIECE_LIMIT: # Blue piece
-                if len(get_valid_moves(board[i])) > 0: # print(f"valid blue move found at {i}")
+                if len(get_valid_moves(i)) > 0: # print(f"valid blue move found at {i}")
                     return False
 
     return True
