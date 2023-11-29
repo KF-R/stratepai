@@ -11,13 +11,12 @@ pieceDistribtions = [0, 1, 1, 8, 5, 4, 4, 4, 3, 2, 1, 1, 6]
 PIECE_LIMIT = len(pieceChar) + 1
 ANSI = {'black': "\u001b[30m", 'red': "\u001b[31m", 'green': "\u001b[32m", 'yellow': "\u001b[33m", 'blue': "\u001b[34m", 'magenta': "\u001b[35m", 'cyan': "\u001b[36m", 'white': "\u001b[37m", 'default': "\u001b[0m"}
 
-activePlayer, setupPhase, victory = TEAM_RED, True, False
-selection, target = None, None
+activePlayer, setupPhase, victory, selection, target, messageText = TEAM_RED, True, False, None, None, ''
 
-def piece_char(piece_value: int = 0):
+def piece_char(piece_value: int = 0) -> str:
     return ANSI['red'] + pieceChar[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceChar[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
-def piece_name(piece_value: int = 0):
+def piece_name(piece_value: int = 0) -> str:
     return ANSI['red'] + pieceName[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceName[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
 def set_piece(row: int = 0, piece_value:int = 0, numRows:int = 1):
@@ -40,13 +39,10 @@ def set_piece(row: int = 0, piece_value:int = 0, numRows:int = 1):
     # Find all indices of zeros in the rows
     empty_spaces = [i for i, x in enumerate(board_rows) if x == 0]
 
-    # Check if there are any zeros to replace
-    if empty_spaces:
-        # Randomly select one of these indices
-        replace_index = random.choice(empty_spaces)
-
-        # Replace the zero with the piece value
-        board_rows[replace_index] = piece_value
+    if empty_spaces: # Check if there are any zeros to replace
+        
+        replace_index = random.choice(empty_spaces) # Randomly select one 
+        board_rows[replace_index] = piece_value # Replace with the piece 
 
         # Update the board with the modified rows
         board[row_start:row_end] = board_rows
@@ -88,23 +84,32 @@ def print_board():
             else:  
                 if char > PIECE_LIMIT: 
                     char = char - PIECE_LIMIT
-                    side = 1
-                    outputRow += ANSI['cyan']
+                    side = TEAM_BLUE
+                    outputRow += ANSI['cyan'] 
+                    if activePlayer == TEAM_RED:
+                        outputRow += f" # "
+                    else:
+                        outputRow += f" {pieceChar[char]} "
+
                 else:
-                    side = 0
+                    side = TEAM_RED
                     outputRow += ANSI['red']
-                outputRow += f" {pieceChar[char]} "
+                    if activePlayer == TEAM_BLUE:
+                        outputRow += f" # "
+                    else:
+                        outputRow += f" {pieceChar[char]} "
+
         
         print(f"{outputRow}" + ANSI['default'])
 
-    # if setupPhase: print(f" {ANSI['green']}Setup Phase{ANSI['default']} ".center(20,'-'))
     if setupPhase: print('  ' + ANSI['yellow'] + f" Setup Phase ".center(29,'-'))
+    elif messageText: print('  ' + ANSI['white'] + messageText)
     else: print('  ' + ANSI['green'] + "".center(29,'-'))
 
-def is_friendly(subject_piece_value, target_piece_value):
+def is_friendly(subject_piece_value, target_piece_value) -> bool:
     return (subject_piece_value > PIECE_LIMIT) == (target_piece_value >= PIECE_LIMIT)
 
-def get_valid_moves(selection: int):
+def get_valid_moves(selection: int) -> list:
 
     def follow_line_to_obstacle(line):
         result = []
@@ -172,7 +177,7 @@ def validated_input(prompt:str = '> ') -> int:
             print(f"{ANSI['yellow']}Invalid input. Please enter a single digit, a space, then another single digit." + ANSI['default'] + ' (Q to quit, ENTER to cancel or continue)')
             return None
 
-def resolve_conflict(attacker: int, defender: int ):
+def resolve_conflict(attacker: int, defender: int ) -> int:
     global victory
     if defender == 0: return attacker
     attacker_strength, defender_strength = attacker % PIECE_LIMIT, defender % PIECE_LIMIT # Blue pieces are > PIECE_LIMIT
@@ -201,7 +206,7 @@ def no_valid_moves_check():
 
     return True
 
-def positions_to_string(tuple_list):
+def positions_to_string(tuple_list) -> str:
     result = ""
     for tpl in tuple_list: result += f"{tpl[0]} {tpl[1]}, "
     return result[:-2] # Last two characters (, ) removed from list
@@ -221,7 +226,10 @@ while setupPhase:
         prompt += 'Select a piece to swap (x y): ' + ANSI['default']
         selection = validated_input(prompt)
         if not selection == None:
-            if (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
+            if board[selection] == 0:
+                print(f"Not a valid piece.")
+                selection = None 
+            elif (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
                 print(f"That is not your piece ({piece_char(board[selection])})")
                 selection = None
         else: # Valid input but no selection; ending turn
