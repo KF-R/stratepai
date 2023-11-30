@@ -4,7 +4,7 @@ board[42], board[43], board[52], board[53], board[46], board[47], board[56], boa
 
 TEAM_RED, TEAM_BLUE = 0, 1 
 P_FLAG = 1; P_SPY = 2; P_SCOUT = 3; P_MINER = 4; P_MARSHALL = 11; P_BOMB = 12 # Pieces with special rules
-PIECE_CHAR = ['', '@', 'S', '1', 'm', '3', '4', '5', '6', 'C', 'G', 'M', 'o'] # ASCII piece representation unicode: @Ⓢ①ⓜ③④⑤⑥ⒸⒼⓂⓞ, @🅢𝟏🅜𝟑𝟒𝟓𝟔🅒🅖🅜🅞
+PIECE_CHAR, CONCEALED_CHAR = ['', '¶', 's', '¹', '²', '3', '4', '5', '6', '7', '8', '9', 'o'], '■' # ASCII piece representation
 PIECE_NAME = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb']
 TEAM_NAME = ['Red', 'Blue']
 PIECE_DISTRIBUTIONS = [0, 1, 1, 8, 5, 4, 4, 4, 3, 2, 1, 1, 6]
@@ -14,6 +14,21 @@ LOG_WIDTH = 48
 LOG_SIDE, LOG_TOP, LOG_BOTTOM = "|", f".{(' Log '.center(LOG_WIDTH - 2,'-'))}.", f"'{('-' * (LOG_WIDTH - 2))}'"
 
 turn, activePlayer, setupPhase, victory, selection, target, messageText, log = 0, TEAM_RED, True, False, None, None, '', []
+
+
+AI = True
+
+
+def get_BishopAI_piece():
+    """ TODO: Don't knowingly attack betters """
+    global messageText, selection
+
+    moveable_pieces = []
+    for i in range(0,100):
+        if board[i] > PIECE_LIMIT: continue
+        if len(get_valid_moves(i)) > 0: moveable_pieces.append(i)
+
+    selection = random.choice(moveable_pieces)
 
 def log_action(logMessage: str = ''):
     if logMessage: log.append(logMessage)
@@ -97,17 +112,17 @@ def print_board():
                     side = TEAM_BLUE
                     outputRow += ANSI['cyan'] 
                     if activePlayer == TEAM_RED:
-                        outputRow += f" # "
+                        outputRow += f" {CONCEALED_CHAR} " # #
                     else:
-                        outputRow += f" {PIECE_CHAR[char]} "
+                        outputRow += f" {PIECE_CHAR[char]} " if selection != i + c else f"[{PIECE_CHAR[char]}]"
 
                 else:
                     side = TEAM_RED
                     outputRow += ANSI['red']
                     if activePlayer == TEAM_BLUE:
-                        outputRow += f" # "
+                        outputRow += f" {CONCEALED_CHAR} " # #
                     else:
-                        outputRow += f" {PIECE_CHAR[char]} "
+                        outputRow += f" {PIECE_CHAR[char]} " if selection != i + c else f"[{PIECE_CHAR[char]}]"
 
         fillerLength = 0
         logSection = log[-10:]
@@ -208,7 +223,7 @@ def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
         return attacker
     attacker_strength, defender_strength = attacker % PIECE_LIMIT, defender % PIECE_LIMIT # Blue pieces are > PIECE_LIMIT
     if defender_strength == P_FLAG:
-        print(f"Player {activePlayer} wins!") 
+        print(f"Player {activePlayer} wins in {turns} turns!") 
         victory = True
         return attacker
     elif defender_strength == P_BOMB and attacker_strength == P_MINER: 
@@ -252,6 +267,8 @@ setup_pieces(TEAM_BLUE)
 
 # Players can rearrange pieces
 while setupPhase:
+
+    if AI: activePlayer = TEAM_BLUE
 
     print_board()
 
@@ -298,7 +315,9 @@ while setupPhase:
 # Setup complete, taking turns until flag exposed
 while not victory:
 
-    if activePlayer == TEAM_RED: turn += 1
+    if activePlayer == TEAM_RED:
+        if AI: get_BishopAI_piece()
+        turn += 1
     print_board()
 
     # Players can lose if none of their pieces can move
@@ -321,9 +340,13 @@ while not victory:
             else:
                 valid_destinations = get_valid_moves(selection)
                 if len(valid_destinations) == 0:
+                    messageText = f"{piece_name(board[selection])} has no valid moves."
                     selection = None
                     
         print_board()            
+
+                
+    if AI: valid_destinations = get_valid_moves(selection)
 
     # Piece selected, need valid move destination
     if not selection == None:
@@ -335,7 +358,10 @@ while not victory:
         while target == None:
             prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
             prompt += ' Select a valid move (x y): ' + ANSI['default']
-            target = validated_input(prompt)
+            if AI and activePlayer == TEAM_RED: 
+                target = valid_destinations[-1]
+            else:
+                target = validated_input(prompt)
             if not target == None:
                 
                 if target in valid_destinations:
