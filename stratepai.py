@@ -121,7 +121,7 @@ def print_board():
 
     if setupPhase: print('  ' + ANSI['yellow'] + f" Setup Phase ".center(29,'-') + ANSI['default'] + f" {LOG_BOTTOM}")
     else: print('  ' + ANSI['green'] + f"{turn}".center(29,'-') + ANSI['default'] + f" {LOG_BOTTOM}")
-    if messageText: print('  ' + ANSI['white'] + messageText + ANSI['default'])
+    if messageText: print(' ' + ANSI['white'] + messageText + ANSI['default'])
     elif selection == None: print()
 
 def is_friendly(subject_piece_value, target_piece_value) -> bool:
@@ -258,36 +258,38 @@ while setupPhase:
     # Loop until valid piece successfully selected
     while selection == None:
         prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
-        prompt += 'Select a piece to swap (x y): ' + ANSI['default']
+        prompt += ' Select a piece to swap (x y): ' + ANSI['default']
         selection = validated_input(prompt)
         if not selection == None:
             if board[selection] == 0:
-                print(f"Not a valid piece.")
+                messageText = "That is not a valid piece."
                 selection = None 
             elif (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
-                print(f"That is not your piece ({piece_char(board[selection])})")
+                messageText = f"That is not your piece."
                 selection = None
         else: # Valid input but no selection; ending turn
             break
 
+        print_board()
+
     # Piece selected, need target to swap with
     if not selection == None:
-        print(f"Selected: {piece_char(board[selection])}")
+        print(f" Selected: {piece_char(board[selection])}")
 
         while target == None:
             prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
-            prompt += 'Select a target position to swap with (x y): ' + ANSI['default']
+            prompt += ' Select a target position to swap with (x y): ' + ANSI['default']
             target = validated_input(prompt)
             if not target == None:
                 if board[target] == 0:
-                    print(f"Not a valid target position.")
+                    messageText = "Not a valid target position."
                     target = None 
                 elif (activePlayer > 0 and board[target] <= PIECE_LIMIT) or (activePlayer == 0 and board[target] > PIECE_LIMIT):
-                    print(f"That is not your piece ({piece_char(board[target])})")
+                    messageText = "That is not your piece."
                     target = None
-        
-        print(f"Target: {piece_char(board[target])}")
 
+            print_board()
+        
         swapPiece = board[selection]
         board[selection] = board[target]
         board[target] = swapPiece
@@ -310,16 +312,15 @@ while not victory:
     # Loop until valid piece successfully selected
     while selection == None:
         prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
-        prompt += 'Select a piece to move (x y): ' + ANSI['default']
+        prompt += ' Select a piece to move (x y): ' + ANSI['default']
         selection = validated_input(prompt)
         if not selection == None:
             if (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
-                messageText = (f"That is not your piece.")
+                messageText = f"That is not your piece."
                 selection = None
             else:
                 valid_destinations = get_valid_moves(selection)
                 if len(valid_destinations) == 0:
-                    print(f"No valid moves ({piece_char(board[selection])})")
                     selection = None
                     
         print_board()            
@@ -329,11 +330,11 @@ while not victory:
         yx_coords = [divmod(position, 10) for position in valid_destinations]
         xy_coords = [(x, y) for y, x in yx_coords]
 
-        print(f"Selected: {piece_name(board[selection])}  Moves: {positions_to_string(xy_coords)}")
+        print(f" Selected: {piece_name(board[selection])}  Moves: {positions_to_string(xy_coords)}")
 
         while target == None:
             prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
-            prompt += 'Select a valid move (x y): ' + ANSI['default']
+            prompt += ' Select a valid move (x y): ' + ANSI['default']
             target = validated_input(prompt)
             if not target == None:
                 
