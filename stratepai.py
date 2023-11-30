@@ -1,23 +1,28 @@
-import random, os
+import random, os, re
 board = [0] * 100
 board[42], board[43], board[52], board[53], board[46], board[47], board[56], board[57] = [255] * 8 # Lakes
 
 TEAM_RED, TEAM_BLUE = 0, 1 
 P_FLAG = 1; P_SPY = 2; P_SCOUT = 3; P_MINER = 4; P_MARSHALL = 11; P_BOMB = 12 # Pieces with special rules
-pieceChar = ['', '@', 'S', '1', 'm', '3', '4', '5', '6', 'C', 'G', 'M', 'o'] # ASCII piece representation
-pieceName = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb']
-teamName = ['Red', 'Blue']
-pieceDistribtions = [0, 1, 1, 8, 5, 4, 4, 4, 3, 2, 1, 1, 6]
-PIECE_LIMIT = len(pieceChar) + 1
+PIECE_CHAR = ['', '@', 'S', '1', 'm', '3', '4', '5', '6', 'C', 'G', 'M', 'o'] # ASCII piece representation unicode: @Ⓢ①ⓜ③④⑤⑥ⒸⒼⓂⓞ, @🅢𝟏🅜𝟑𝟒𝟓𝟔🅒🅖🅜🅞
+PIECE_NAME = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb']
+TEAM_NAME = ['Red', 'Blue']
+PIECE_DISTRIBUTIONS = [0, 1, 1, 8, 5, 4, 4, 4, 3, 2, 1, 1, 6]
+PIECE_LIMIT = len(PIECE_CHAR) + 1
 ANSI = {'black': "\u001b[30m", 'red': "\u001b[31m", 'green': "\u001b[32m", 'yellow': "\u001b[33m", 'blue': "\u001b[34m", 'magenta': "\u001b[35m", 'cyan': "\u001b[36m", 'white': "\u001b[37m", 'default': "\u001b[0m"}
+LOG_WIDTH = 48
+LOG_SIDE, LOG_TOP, LOG_BOTTOM = "|", f".{(' Log '.center(LOG_WIDTH - 2,'-'))}.", f"'{('-' * (LOG_WIDTH - 2))}'"
 
-activePlayer, setupPhase, victory, selection, target, messageText = TEAM_RED, True, False, None, None, ''
+turn, activePlayer, setupPhase, victory, selection, target, messageText, log = 0, TEAM_RED, True, False, None, None, '', []
+
+def log_action(logMessage: str = ''):
+    if logMessage: log.append(logMessage)
 
 def piece_char(piece_value: int = 0) -> str:
-    return ANSI['red'] + pieceChar[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceChar[piece_value - PIECE_LIMIT] + ANSI['default'] 
+    return ANSI['red'] + PIECE_CHAR[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + PIECE_CHAR[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
 def piece_name(piece_value: int = 0) -> str:
-    return ANSI['red'] + pieceName[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + pieceName[piece_value - PIECE_LIMIT] + ANSI['default'] 
+    return ANSI['red'] + PIECE_NAME[piece_value] + ANSI['default'] if piece_value < PIECE_LIMIT else ANSI['cyan'] + PIECE_NAME[piece_value - PIECE_LIMIT] + ANSI['default'] 
 
 def set_piece(row: int = 0, piece_value:int = 0, numRows:int = 1):
     """
@@ -54,7 +59,7 @@ def setup_pieces(side: int = 1):  # side 0: top, red, <= PIECE_LIMIT  side 1: bo
     set_piece(side * 9, 1 + (side * PIECE_LIMIT))
     
     # Place bombs 
-    numBombs = pieceDistribtions[P_BOMB]
+    numBombs = PIECE_DISTRIBUTIONS[P_BOMB]
     while numBombs > 0:
         set_piece(side * 6, P_BOMB + (side * PIECE_LIMIT) , 4)
         numBombs -= 1
@@ -62,21 +67,26 @@ def setup_pieces(side: int = 1):  # side 0: top, red, <= PIECE_LIMIT  side 1: bo
     # Place other pieces
     piece_value = 11
     while piece_value > 1:
-        numPieces = pieceDistribtions[piece_value]
+        numPieces = PIECE_DISTRIBUTIONS[piece_value]
         while numPieces >= 1:
             set_piece(side * 6, piece_value + (side * PIECE_LIMIT) , 4)
             numPieces -= 1  
         piece_value -= 1
 
     return
-    
+
+def strip_ANSI(line):
+    escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+    return escape.sub('', line)
+
 def print_board():
     os.system("clear")
-    print(ANSI['default'] + "   " + "  ".join(str(i) for i in range(0, 10)))
+
+    print(ANSI['default'] + "   " + "  ".join(str(i) for i in range(0, 10)) + f" {LOG_TOP}")
     for i in range(0, len(board), 10):
         outputRow = f"{i // 10} " + ANSI['black']
         row = board[i:i+10]
-        for char in row:
+        for c, char in enumerate(row):
             if char == 255:
                 outputRow += ANSI['blue'] + '~~~'
             elif char == 0:
@@ -89,7 +99,7 @@ def print_board():
                     if activePlayer == TEAM_RED:
                         outputRow += f" # "
                     else:
-                        outputRow += f" {pieceChar[char]} "
+                        outputRow += f" {PIECE_CHAR[char]} "
 
                 else:
                     side = TEAM_RED
@@ -97,14 +107,22 @@ def print_board():
                     if activePlayer == TEAM_BLUE:
                         outputRow += f" # "
                     else:
-                        outputRow += f" {pieceChar[char]} "
+                        outputRow += f" {PIECE_CHAR[char]} "
 
-        
-        print(f"{outputRow}" + ANSI['default'])
+        fillerLength = 0
+        logSection = log[-10:]
+        if len(log) > i // 10: 
+            logLine = logSection[i // 10]
+            trueLength = len(strip_ANSI(logLine))
+            fillerLength = LOG_WIDTH - trueLength - 2
 
-    if setupPhase: print('  ' + ANSI['yellow'] + f" Setup Phase ".center(29,'-'))
-    elif messageText: print('  ' + ANSI['white'] + messageText)
-    else: print('  ' + ANSI['green'] + "".center(29,'-'))
+        else: logLine = ' ' * (LOG_WIDTH - 2)
+        print(f"{outputRow}" + ANSI['default'] + f"{LOG_SIDE}{logLine}{' ' * fillerLength}{LOG_SIDE}" )
+
+    if setupPhase: print('  ' + ANSI['yellow'] + f" Setup Phase ".center(29,'-') + ANSI['default'] + f" {LOG_BOTTOM}")
+    else: print('  ' + ANSI['green'] + f"{turn}".center(29,'-') + ANSI['default'] + f" {LOG_BOTTOM}")
+    if messageText: print('  ' + ANSI['white'] + messageText + ANSI['default'])
+    elif selection == None: print()
 
 def is_friendly(subject_piece_value, target_piece_value) -> bool:
     return (subject_piece_value > PIECE_LIMIT) == (target_piece_value >= PIECE_LIMIT)
@@ -146,8 +164,8 @@ def get_valid_moves(selection: int) -> list:
     return north + east + south + west
 
 def validated_input(prompt:str = '> ') -> int:
-    global selection, activePlayer, setupPhase
-
+    global selection, activePlayer, setupPhase, messageText
+    messageText = '' # Used for input feedback
     while True:
         user_input = input(prompt)
         if user_input == '': # End turn if nothing selected; otherwise cancel selection
@@ -159,7 +177,6 @@ def validated_input(prompt:str = '> ') -> int:
                         setupPhase = False
                     else:
                         activePlayer = TEAM_BLUE
-                    
             selection = None
             target = None
             return None
@@ -174,26 +191,44 @@ def validated_input(prompt:str = '> ') -> int:
             x, y = int(parts[0]), int(parts[1])
             return (y * 10) + x
         else:
-            print(f"{ANSI['yellow']}Invalid input. Please enter a single digit, a space, then another single digit." + ANSI['default'] + ' (Q to quit, ENTER to cancel or continue)')
+            messageText = f"{ANSI['yellow']}Invalid input. Please enter a single digit, a space, then another single digit." + ANSI['default'] + ' (Q to quit, ENTER to cancel or continue)'
+            
             return None
 
-def resolve_conflict(attacker: int, defender: int ) -> int:
+def get_coords(position: int) -> tuple:
+    y, x = divmod(position, 10)
+    return (x, y)
+
+def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
     global victory
-    if defender == 0: return attacker
+    attacker, defender = board[attacker_position], board[defender_position]
+    if defender == 0:
+        attackTeam = ANSI['red'] + TEAM_NAME[TEAM_RED] + ANSI['default'] if attacker <= PIECE_LIMIT else ANSI['cyan'] + TEAM_NAME[TEAM_BLUE] + ANSI['default']
+        log_action(f"{attackTeam} piece has moved from {positions_to_string([get_coords(attacker_position)])} to {positions_to_string([get_coords(defender_position)])}") 
+        return attacker
     attacker_strength, defender_strength = attacker % PIECE_LIMIT, defender % PIECE_LIMIT # Blue pieces are > PIECE_LIMIT
     if defender_strength == P_FLAG:
         print(f"Player {activePlayer} wins!") 
         victory = True
         return attacker
-    elif defender_strength == P_BOMB and attacker_strength == P_MINER: return attacker # piece_name(defender) destroyed
-    elif defender_strength == P_MARSHALL and attacker_strength == P_SPY: return attacker # piece_name(defender) destroyed
-    elif defender_strength == attacker_strength: return 0 # piece_name(attacker) and piece_name(defender) destroyed
-    elif defender_strength < attacker_strength: return attacker # piece_name(defender) destroyed
-    else: return defender # piece_name(attacker) destroyed
+    elif defender_strength == P_BOMB and attacker_strength == P_MINER: 
+        log_action(f"{piece_name(attacker)} defused {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        return attacker # piece_name(defender) destroyed
+    elif defender_strength == P_MARSHALL and attacker_strength == P_SPY:
+        log_action(f"{piece_name(attacker)} assassinated {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        return attacker # piece_name(defender) destroyed
+    elif defender_strength == attacker_strength: 
+        log_action(f"{piece_name(attacker)} and {piece_name(defender)} destroyed at {positions_to_string([get_coords(defender_position)])}") 
+        return 0 # piece_name(attacker) and piece_name(defender) destroyed
+    elif defender_strength < attacker_strength: 
+        log_action(f"{piece_name(attacker)} destroyed {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        return attacker # piece_name(defender) destroyed
+    else:
+        log_action(f"{piece_name(defender)} defeated {piece_name(attacker)} attack from {positions_to_string([get_coords(attacker_position)])}") 
+        return defender # piece_name(attacker) destroyed
 
 def no_valid_moves_check():
     for i in range(0, len(board)):
-        # print(piece_name(board[i]))
         if board[i] == 0 or board[i] == 255: continue
         if activePlayer == TEAM_RED:
             if board[i] <= PIECE_LIMIT: # Red piece
@@ -261,13 +296,14 @@ while setupPhase:
 # Setup complete, taking turns until flag exposed
 while not victory:
 
+    if activePlayer == TEAM_RED: turn += 1
     print_board()
 
     # Players can lose if none of their pieces can move
     if no_valid_moves_check():
-        print(f"{teamName[activePlayer]} is unable to move.")
+        print(f"{TEAM_NAME[activePlayer]} is unable to move.")
         activePlayer = activePlayer ^ 1
-        print(f"{teamName[activePlayer]} wins!")
+        print(f"{TEAM_NAME[activePlayer]} wins!")
         victory = True
         continue
 
@@ -278,7 +314,7 @@ while not victory:
         selection = validated_input(prompt)
         if not selection == None:
             if (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
-                print(f"That is not your piece ({piece_char(board[selection])})")
+                messageText = (f"That is not your piece.")
                 selection = None
             else:
                 valid_destinations = get_valid_moves(selection)
@@ -286,8 +322,7 @@ while not victory:
                     print(f"No valid moves ({piece_char(board[selection])})")
                     selection = None
                     
-        else: # Valid input but no selection; ending turn
-            break
+        print_board()            
 
     # Piece selected, need valid move destination
     if not selection == None:
@@ -304,7 +339,7 @@ while not victory:
                 
                 if target in valid_destinations:
 
-                    winner = resolve_conflict(board[selection], board[target])
+                    winner = resolve_conflict(selection, target)
 
                     board[target] = winner
                     board[selection] = 0
