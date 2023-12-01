@@ -20,6 +20,7 @@ turn, activePlayer, setupPhase, victory, selection, target, messageText, log = 0
 
 AI = True
 
+# TODO: Fix cancelling swaps and moves bug
 
 def get_BishopAI_piece():
     """ TODO: Don't knowingly attack betters """
