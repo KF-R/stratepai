@@ -13,8 +13,8 @@ _Unknown pieces use:_ ■
 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb'
 
 <hr/>
-Stratego on Wikipedia:
+Stratego on Wikipedia: <br/>
 https://en.wikipedia.org/wiki/Stratego
 <br/><br/>
-Leading research on Stratego AI:
+Leading research on Stratego AI: <br/>
 https://deepmind.google/discover/blog/mastering-stratego-the-classic-game-of-imperfect-information/
