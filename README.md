@@ -1,7 +1,7 @@
 ## stratepai (/ˈstrætə-paɪ/ "stratta-pie")
 Terminal Stratego for the ASCII and ANSI inclined.
-<img src="https://github.com/KF-R/stratepai/assets/6677966/222e26b3-c290-4c3c-b029-1bbba4216fed" align="right" height="241">
 
+<img src="https://github.com/KF-R/stratepai/assets/6677966/222e26b3-c290-4c3c-b029-1bbba4216fed" align="right" height="241">
 This is a fairly concise plain text Stratego interface that has been useful for experimenting with various AI's. 
 <hr/>
 
