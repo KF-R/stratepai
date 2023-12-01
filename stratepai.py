@@ -20,7 +20,6 @@ turn, activePlayer, setupPhase, victory, selection, target, messageText, log = 0
 
 AI = True
 
-# TODO: Fix cancelling swaps and moves bug
 
 def get_BishopAI_piece():
     """ TODO: Don't knowingly attack betters """
@@ -186,7 +185,7 @@ def validated_input(prompt:str = '> ') -> int:
     messageText = '' # Used for input feedback
     while True:
         user_input = input(prompt)
-        if user_input == '': # End turn if nothing selected; otherwise cancel selection
+        if user_input == '' and setupPhase: # End turn if nothing selected; otherwise cancel selection
             if not selection:
                  # No selection so not cancelling a swap or move 
                 if setupPhase:
@@ -296,7 +295,7 @@ while setupPhase:
     if not selection == None:
         print(f" Selected: {piece_char(board[selection])}")
 
-        while target == None:
+        while (target == None) and selection is not None:
             prompt = ANSI['red'] if activePlayer == TEAM_RED else ANSI['cyan']
             prompt += ' Select a target position to swap with (x y): ' + ANSI['default']
             target = validated_input(prompt)
@@ -310,10 +309,11 @@ while setupPhase:
 
             print_board()
         
-        swapPiece = board[selection]
-        board[selection] = board[target]
-        board[target] = swapPiece
-        selection, target = None, None
+        if target is not None:
+            swapPiece = board[selection]
+            board[selection] = board[target]
+            board[target] = swapPiece
+            selection, target = None, None
 
 # Setup complete, taking turns until flag exposed
 while not victory:
@@ -382,4 +382,4 @@ while not victory:
                     print(f"That is not a valid move.")
                     target = None
 
-print('Bye!')
+print(' Bye!')
