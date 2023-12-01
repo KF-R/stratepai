@@ -6,6 +6,8 @@ TEAM_RED, TEAM_BLUE = 0, 1
 P_FLAG = 1; P_SPY = 2; P_SCOUT = 3; P_MINER = 4; P_MARSHALL = 11; P_BOMB = 12 # Pieces with special rules
 PIECE_CHAR, CONCEALED_CHAR = ['', '¶', 's', '¹', '²', '3', '4', '5', '6', '7', '8', '9', 'o'], '■' # ASCII piece representation
 PIECE_NAME = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb']
+for n in range(1, len(PIECE_NAME)):
+    PIECE_NAME[n] = f"{PIECE_NAME[n]} ({PIECE_CHAR[n]})"
 TEAM_NAME = ['Red', 'Blue']
 PIECE_DISTRIBUTIONS = [0, 1, 1, 8, 5, 4, 4, 4, 3, 2, 1, 1, 6]
 PIECE_LIMIT = len(PIECE_CHAR) + 1
@@ -223,7 +225,7 @@ def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
         return attacker
     attacker_strength, defender_strength = attacker % PIECE_LIMIT, defender % PIECE_LIMIT # Blue pieces are > PIECE_LIMIT
     if defender_strength == P_FLAG:
-        print(f"Player {activePlayer} wins in {turns} turns!") 
+        print(f"Player {activePlayer} wins in {turn} turns!") 
         victory = True
         return attacker
     elif defender_strength == P_BOMB and attacker_strength == P_MINER: 
@@ -239,7 +241,7 @@ def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
         log_action(f"{piece_name(attacker)} destroyed {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
         return attacker # piece_name(defender) destroyed
     else:
-        log_action(f"{piece_name(defender)} defeated {piece_name(attacker)} attack from {positions_to_string([get_coords(attacker_position)])}") 
+        log_action(f"{piece_name(defender)} defeated {piece_name(attacker)} from {positions_to_string([get_coords(attacker_position)])}") 
         return defender # piece_name(attacker) destroyed
 
 def no_valid_moves_check():
