@@ -1,15 +1,20 @@
 ## stratepai (/ˈstrætə-paɪ/ "stratta-pie")
 Terminal Stratego for the ASCII and ANSI inclined.
-<img src="https://github.com/KF-R/stratepai/assets/6677966/8b84c258-951c-4fdc-8db3-d35957dcb91c" align="right" height="266">
+<img src="https://github.com/KF-R/stratepai/assets/6677966/222e26b3-c290-4c3c-b029-1bbba4216fed" align="right" height="241">
 
-This plain text Stratego interface is useful for training AI's.  Also, having been written in just 300 Python locs (approx. lines of code), it's easily integrated into another project. 
+This is a fairly concise plain text Stratego interface that has been useful for experimenting with various AI's. 
 <hr/>
 
 ### Piece notation: 
-'@', 'S', '1', 'm', '3', '4', '5', '6', 'C', 'G', 'M', 'o'
+¶ s ¹ ² 3 4 5 6 7 8 9 o <br/>
+_Unknown pieces use:_ ■
 
 ### Corresponding piece names:
 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb'
+
 <hr/>
-Link to Stratego rules on Wikipedia:
+Stratego on Wikipedia:
 https://en.wikipedia.org/wiki/Stratego
+<br/><br/>
+Leading research on Stratego AI:
+https://deepmind.google/discover/blog/mastering-stratego-the-classic-game-of-imperfect-information/
