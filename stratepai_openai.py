@@ -1,6 +1,6 @@
 # This code is for v1 of the openai package: pypi.org/project/openai
 from openai import OpenAI
-from my_env.py import API_KEY
+from my_env import API_KEY
 client = OpenAI(api_key=API_KEY)
 
 def get_openAI_move(game_state_report: str) -> str:
