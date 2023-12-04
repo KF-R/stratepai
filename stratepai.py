@@ -218,7 +218,7 @@ def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
         return attacker
     attacker_strength, defender_strength = attacker % PIECE_LIMIT, defender % PIECE_LIMIT # Blue pieces are > PIECE_LIMIT
     if defender_strength == P_FLAG:
-        print(f"Player {activePlayer} wins by capturing the flag in {turn} turns!") 
+        print(f" Player {activePlayer} wins by capturing the flag in {turn} turns!") 
         victory = True
         return attacker
     elif defender_strength == P_BOMB and attacker_strength == P_MINER: 
@@ -334,7 +334,9 @@ while not victory:
         aiMove = extract_digits(aiSuggestion)
         if len(aiMove) < 4:
             # OpenAI fail
-            print(f"OpenAI suggestion fail: {aiMove}")
+            # print(f"OpenAI suggestion fail: {aiMove}")
+            messageText = "OpenAI suggestion fail: {aiMove}"
+            log_action(f"OpenAI suggestion fail: {aiMove}")
             get_fallbackAI_move()
         else:
             selection  = (aiMove[1] * 10) + aiMove[0]
@@ -343,7 +345,9 @@ while not victory:
        
         valid_destinations = get_valid_moves(selection)
         if target not in valid_destinations:
-            print(f"OpenAI detail fail: {aiMove}")
+            # print(f"OpenAI detail fail: {aiMove}")
+            messageText = "OpenAI detail fail: {aiMove}"
+            log_action(f"OpenAI detail fail: {aiMove}")
             get_fallbackAI_move()
 
         turn += 1
@@ -366,6 +370,9 @@ while not victory:
         if not selection == None:
             if (activePlayer > 0 and board[selection] <= PIECE_LIMIT) or (activePlayer == 0 and board[selection] > PIECE_LIMIT):
                 messageText = f"That is not your piece."
+                selection = None
+            elif board[selection] == 255 or board[selection]== 0:
+                messageText = f"That is not a valid piece."
                 selection = None
             else:
                 valid_destinations = get_valid_moves(selection)
