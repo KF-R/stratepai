@@ -77,11 +77,10 @@ def summarise_state(fromSide: int = TEAM_RED):
     gameState += "## Valid moves: \n"
     moves = ''
     for piece in moveable_pieces:
-        name = PIECE_NAME[board[piece['position']] - PIECE_LIMIT]
+        name = PIECE_NAME[board[piece['position']] - PIECE_LIMIT + 1]
         yx_coords = [divmod(position, 10) for position in piece['valid_moves']]
         xy_coords = [(x, y) for y, x in yx_coords]
-        thisX = str(piece['position'])[1]
-        thisY = str(piece['position'])[0]
+        thisY, thisX = divmod(int(piece['position']), 10)
         moves += f"{TEAM_NAME[TEAM_RED]} {name} at {thisX} {thisY} could move to{' any of' if len(piece['valid_moves']) > 1 else ''}: {positions_to_string(xy_coords)}\n"
 
     gameState += moves + "\n"
