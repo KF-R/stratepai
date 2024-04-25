@@ -13,6 +13,16 @@ _Unknown pieces use:_ ■
 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb'
 
 <hr/>
+
+### Installation and usage:
+```
+git clone https://github.com/KF-R/stratepai
+cd stratepai/
+echo "API_KEY='INSERT_YOUR_API_KEY_HERE'" > my_env.py
+python stratepai.py
+```
+
+<hr/>
 Stratego on Wikipedia: <br/>
 https://en.wikipedia.org/wiki/Stratego
 <br/><br/>
