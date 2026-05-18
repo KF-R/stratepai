@@ -49,7 +49,7 @@ def summarise_state(fromSide: int = TEAM_RED):
     """ Writes the game state to a file """
     global gameState
 
-    summaryLog = ['## Most recent moves:'] if len(log) > 0 else ['']
+    summaryLog = ['## Turn log:'] if len(log) > 0 else ['']
     for e, entry in enumerate(log):
         summaryLog.append( (f"Turn {(e // 2) + 1}:" if e % 2 == 0 else "       ") + entry.replace(ANSI['red'],'Red ').replace(ANSI['cyan'], 'Blue ').replace(ANSI['default'],'').replace('Red Red ', 'Red ').replace('Blue Blue ', 'Blue '))
     summary = "\n".join(summaryLog)
@@ -64,7 +64,7 @@ def summarise_state(fromSide: int = TEAM_RED):
             else: summaryRow.append('B#' if char > PIECE_LIMIT else 'R' + PIECE_CHAR[char]) 
         boardState.append(summaryRow)
 
-    gameState = ''
+    gameState = '# Game State Summary:\n\n'
     moveable_pieces = []
     for i in range(0,100):
         if (board[i] > PIECE_LIMIT or board[i] == 0): continue
@@ -76,14 +76,25 @@ def summarise_state(fromSide: int = TEAM_RED):
     gameState += summary + "\n\n"
     gameState += "## Valid moves: \n"
     moves = ''
+    responses = ''
     for piece in moveable_pieces:
         name = PIECE_NAME[board[piece['position']] - PIECE_LIMIT + 1]
         yx_coords = [divmod(position, 10) for position in piece['valid_moves']]
         xy_coords = [(x, y) for y, x in yx_coords]
         thisY, thisX = divmod(int(piece['position']), 10)
         moves += f"{TEAM_NAME[TEAM_RED]} {name} at {thisX} {thisY} could move to{' any of' if len(piece['valid_moves']) > 1 else ''}: {positions_to_string(xy_coords)}\n"
+        
+        if len(piece['valid_moves']) > 1:
+            responses += "\n".join(
+                f"{thisX} {thisY}  {positions_to_string([pos])}\n"
+                for pos in xy_coords
+            )
+        else:
+            responses += f"{thisX} {thisY}  {positions_to_string(xy_coords)}\n"
 
     gameState += moves + "\n"
+    gameState += "## Your Valid Responses: \n"
+    gameState += responses + "\n\n"
 
     if WRITE_STATE:
         with open(STATE_FILE, 'w', encoding='utf-8') as file:
@@ -333,10 +344,10 @@ while not victory:
         aiSuggestion = get_openAI_move(gameState)
         aiMove = extract_digits(aiSuggestion)
         if len(aiMove) < 4:
-            # OpenAI fail
-            # print(f"OpenAI suggestion fail: {aiMove}")
-            messageText = "OpenAI suggestion fail: {aiMove}"
-            log_action(f"OpenAI suggestion fail: {aiMove}")
+            # AI fail
+            # print(f"AI suggestion fail: {aiMove}")
+            messageText = "AI suggestion fail: {aiMove}"
+            log_action(f"AI suggestion fail: {aiMove}")
             get_fallbackAI_move()
         else:
             selection  = (aiMove[1] * 10) + aiMove[0]
@@ -345,9 +356,9 @@ while not victory:
        
         valid_destinations = get_valid_moves(selection)
         if target not in valid_destinations:
-            # print(f"OpenAI detail fail: {aiMove}")
-            messageText = "OpenAI detail fail: {aiMove}"
-            log_action(f"OpenAI detail fail: {aiMove}")
+            # print(f"AI detail fail: {aiMove}")
+            messageText = "AI detail fail: {aiMove}"
+            log_action(f"AI detail fail: {aiMove}")
             get_fallbackAI_move()
 
         turn += 1
