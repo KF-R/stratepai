@@ -7,7 +7,7 @@ STATE_FILE = "stratepai.state"
 TEAM_RED, TEAM_BLUE = 0, 1 
 P_FLAG = 1; P_SPY = 2; P_SCOUT = 3; P_MINER = 4; P_MARSHALL = 11; P_BOMB = 12 # Pieces with special rules
 PIECE_CHAR, CONCEALED_CHAR = ['', '¶', 's', '¹', '²', '3', '4', '5', '6', '7', '8', '9', 'o'], '■' # ASCII piece representation
-PIECE_NAME = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb']
+PIECE_NAME = ['', 'Flag', 'Spy', 'Scout', 'Miner', 'Sgt.', 'Lt.', 'Captain', 'Major', 'Colonel', 'General', 'Marshal', 'Bomb']
 for n in range(1, len(PIECE_NAME)):
     PIECE_NAME[n] = f"{PIECE_NAME[n]} ({PIECE_CHAR[n]})"
 TEAM_NAME = ['Red', 'Blue']
@@ -233,19 +233,19 @@ def resolve_conflict(attacker_position: int, defender_position: int ) -> int:
         victory = True
         return attacker
     elif defender_strength == P_BOMB and attacker_strength == P_MINER: 
-        log_action(f"{piece_name(attacker)} defused {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        log_action(f"{piece_name(attacker)} [{positions_to_string([get_coords(attacker_position)])}] defused {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
         return attacker # piece_name(defender) destroyed
     elif defender_strength == P_MARSHALL and attacker_strength == P_SPY:
-        log_action(f"{piece_name(attacker)} assassinated {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        log_action(f"{piece_name(attacker)} [{positions_to_string([get_coords(attacker_position)])}] assassinated {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
         return attacker # piece_name(defender) destroyed
     elif defender_strength == attacker_strength: 
-        log_action(f"{piece_name(attacker)} and {piece_name(defender)} met at {positions_to_string([get_coords(defender_position)])}") 
+        log_action(f"{piece_name(attacker)} [{positions_to_string([get_coords(attacker_position)])}] and {piece_name(defender)} met at {positions_to_string([get_coords(defender_position)])}") 
         return 0 # piece_name(attacker) and piece_name(defender) destroyed
     elif defender_strength < attacker_strength: 
-        log_action(f"{piece_name(attacker)} destroyed {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
+        log_action(f"{piece_name(attacker)} [{positions_to_string([get_coords(attacker_position)])}] destroyed {piece_name(defender)} at {positions_to_string([get_coords(defender_position)])}") 
         return attacker # piece_name(defender) destroyed
     else:
-        log_action(f"{piece_name(defender)} defeated {piece_name(attacker)} from {positions_to_string([get_coords(attacker_position)])}") 
+        log_action(f"{piece_name(defender)} [{positions_to_string([get_coords(defender_position)])}] defeated {piece_name(attacker)} from {positions_to_string([get_coords(attacker_position)])}") 
         return defender # piece_name(attacker) destroyed
 
 def no_valid_moves_check():
