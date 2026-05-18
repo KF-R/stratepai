@@ -2,7 +2,7 @@
 Terminal Stratego for the ASCII and ANSI inclined.
 
 <img src="https://github.com/KF-R/stratepai/assets/6677966/222e26b3-c290-4c3c-b029-1bbba4216fed" align="right" height="241">
-This is a fairly concise plain text Stratego interface that has been useful for experimenting with various AI's. 
+This is a fairly concise plain text Stratego interface that has been useful for experimenting with various LLMs. 
 <hr/>
 
 ### Piece notation: 
@@ -14,11 +14,18 @@ _Unknown pieces use:_ ■
 
 <hr/>
 
-### Installation and usage:
+**Assumes a local endpoint to be already running. Confiugrable via** `stratepai_openai.py`**:**
+```
+LMSTUDIO_URL = "http://127.0.0.1:1234/v1/chat/completions"
+```
+
+### Installation and usage
+
+_No dependencies to install; venv not necessary._
+
 ```
 git clone https://github.com/KF-R/stratepai
 cd stratepai/
-echo "API_KEY='INSERT_YOUR_API_KEY_HERE'" > my_env.py
 python stratepai.py
 ```
 
