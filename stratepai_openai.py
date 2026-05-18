@@ -35,7 +35,7 @@ def get_openAI_move(game_state_report: str) -> str:
     with urllib.request.urlopen(request, timeout=120) as response:
         data = json.loads(response.read().decode("utf-8"))
 
-    text = data["choices"][0]["message"]["content"].strip()
+    text = data["choices"][0]["message"]["content"].strip().replace('`','')
     match = MOVE_RE.match(text)
 
     if not match:
