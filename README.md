@@ -10,7 +10,7 @@ This is a fairly concise plain text Stratego interface that has been useful for 
 _Unknown pieces use:_ ■
 
 ### Corresponding piece names:
-'Flag', 'Spy', 'Scout', 'Miner', 'Sergeant', 'Lieutenant', 'Captain', 'Major', 'Colonel', 'General', 'Marshall', 'Bomb'
+'Flag', 'Spy', 'Scout', 'Miner', 'Sgt.', 'Lt.', 'Captain', 'Major', 'Colonel', 'General', 'Marshal', 'Bomb'
 
 <hr/>
 
